@@ -7,3 +7,5 @@ Then we just need to find how many minimum zero sum groups(the list/set which ha
 For example if there is a amounts list like [-2, -3 ,1 ,4], then it only need 4 - 1 = 3 transactions.  If there is a amounts list like [-2, -3, 3, 2] then it only need 4 -2 = 2 transactions.
 
 The last part is using BFS to find minimum zero sum group. 
+
+O(n^2) time complexity
