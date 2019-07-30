@@ -32,6 +32,10 @@ class Solution:
 
         while queue:
             current, steps = queue.popleft()
+            if (start, current) not in record:
+                record[(start, current)] = steps
+            else:
+                record[(start, current)] = min(steps, record[(start, current)])
             if current == end:
                 return steps
             row, col = current
