@@ -10,7 +10,6 @@ class Solution:
         for idx, num in enumerate(nums):
             new_idx = bisect.bisect_left(sorted_nums, num)
             sorted_nums.pop(new_idx)
-            size = len(sorted_nums)
             i = bisect.bisect_left(sorted_nums, (num + 1) // 2)
             result += i
 
