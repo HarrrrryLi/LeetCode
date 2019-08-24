@@ -1,0 +1,4 @@
+Greedy.
+
+
+Time Complexity O(NlogN). Space Complexity O(N)
