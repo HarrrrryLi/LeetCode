@@ -1,66 +1,74 @@
 class Solution:
     def sortItems(self, n: int, m: int, group: List[int], beforeItems: List[List[int]]) -> List[int]:
-        def sort_func(gg, indegree):
-            res = []
-            while len(indegree) > 0:
-                temp = dict(indegree)
-                pop_node = [i for i in temp.keys() if temp[i] == 0]
-                for i in pop_node:
-                    for j in gg[i]:
-                        if j in temp:
-                            temp[j] -= 1
-                    res.append(i)
-                    del (temp[i])
-                if len(temp) > 0 and temp == indegree:
-                    return -1
-                indegree = temp
-            return res
+        graphs = {}
+        group_graph = collections.defaultdict(set)
+        gcnt = 0
+        for idx, g in enumerate(group):
+            if g == -1:
+                g = m + gcnt
+                group[idx] = g
+                gcnt += 1
+            if g not in graphs:
+                graphs[g] = collections.defaultdict(set)
 
-        aggregate = collections.defaultdict(list)
-        cur = -1
-        group_map = {}
+        for idx in range(n):
+            cur_group = group[idx]
+            if idx not in graphs[cur_group]:
+                graphs[cur_group][idx] = set()
+            if cur_group not in group_graph:
+                group_graph[cur_group] = set()
+            for before in beforeItems[idx]:
+                if cur_group == group[before]:
+                    graphs[cur_group][before].add(idx)
+                else:
+                    group_graph[group[before]].add(cur_group)
 
-        for i in range(n):
-            if group[i] == -1:
-                aggregate[cur].append(i)
-                group_map[i] = cur
-                cur -= 1
-            else:
-                aggregate[group[i]].append(i)
-                group_map[i] = group[i]
-
-        gg = collections.defaultdict(list)
-        gf = collections.defaultdict(list)
-        print("start")
-        for i in range(n):
-            if len(beforeItems[i]) > 0:
-                for j in beforeItems[i]:
-                    if group_map[j] != group_map[i]:
-                        gg[group_map[j]].append(group_map[i])
-                        gf[group_map[i]].append(group_map[j])
-        indegree = {k: len(gf[k]) for k in aggregate.keys()}
-        res = sort_func(gg, indegree)
-        if res == -1:
+        if not self.isAcyclic(group_graph):
             return []
-        print(res)
 
-        final_res = []
-        for ii in res:
-            innernode = aggregate[ii]
-            gg = collections.defaultdict(list)
-            gf = collections.defaultdict(list)
+        group_order = []
+        visited = set()
+        for group in group_graph:
+            if group in visited:
+                continue
+            self.toposort(group, group_graph, group_order, visited)
+        group_order.reverse()
 
-            for i in innernode:
-                if len(beforeItems[i]) > 0:
-                    for j in beforeItems[i]:
-                        if group_map[j] == group_map[i]:
-                            gg[j].append(i)
-                            gf[i].append(j)
-
-            indegree = {k: len(gf[k]) for k in innernode}
-            res = sort_func(gg, indegree)
-            if res == -1:
+        result = []
+        for group in group_order:
+            if not self.isAcyclic(graphs[group]):
                 return []
-            else:
-                final_res += res
-        return final_res
+            inner = []
+            visited = set()
+            for item in graphs[group]:
+                if item in visited:
+                    continue
+                self.toposort(item, graphs[group], inner, visited)
+
+            result.extend(reversed(inner))
+
+        return result
+
+    def isAcyclic(self, graph):
+        for key in graph:
+            stack = collections.deque()
+            stack.append((key, set()))
+            while stack:
+                cur, path = stack.pop()
+                for nxt in graph[cur]:
+                    if nxt in path:
+                        return False
+                    temp = set(path)
+                    temp.add(cur)
+                    stack.append((nxt, temp))
+        return True
+
+    def toposort(self, cur, graph, result, visited):
+        visited.add(cur)
+
+        for nxt in graph[cur]:
+            if nxt in visited:
+                continue
+            self.toposort(nxt, graph, result, visited)
+
+        result.append(cur)
