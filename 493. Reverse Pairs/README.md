@@ -4,3 +4,6 @@ First sort this array (don't do inplace sorting). For each num in origin array, 
 Then find insect index of (num + 1) // 2, result add this index
 
 Time Complexity O(NlogN). Space Complexity O(N)
+
+
+We can also store the number instead of index. Time Complexity and Space Complexity are the same
